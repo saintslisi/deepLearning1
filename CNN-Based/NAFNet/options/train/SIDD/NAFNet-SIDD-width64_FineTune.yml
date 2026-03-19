@@ -1,0 +1,87 @@
+# ------------------------------------------------------------------------
+# NAFNet Fine-Tuning su Dataset Custom DIV2K
+# ------------------------------------------------------------------------
+name: NAFNet-DIV2K-Denoising_FineTune
+model_type: ImageRestorationModel
+scale: 1
+num_gpu: 1 # Impostato per la tua GPU T4 su Colab
+manual_seed: 10
+
+# dataset and data loader settings
+datasets:
+  train:
+    name: DIV2K_train_custom
+    type: PairedImageDataset
+    # Percorsi relativi alla cartella principale di NAFNet
+    dataroot_gt: ./datasets/DIV2K_train_HR
+    dataroot_lq: ./datasets/DIV2K_train_LR_custom
+    
+    # Parametri di ottimizzazione memoria per T4
+    gt_size: 128 # Dimensione delle patch estratte casualmente
+    batch_size_per_gpu: 8 
+    num_worker_per_gpu: 4
+    dataset_enlarge_ratio: 1
+    prefetch_mode: ~
+    io_backend:
+      type: disk
+
+  val:
+    name: DIV2K_val_custom
+    type: PairedImageDataset
+    dataroot_gt: ./datasets/DIV2K_valid_HR
+    dataroot_lq: ./datasets/DIV2K_valid_LR_custom
+    io_backend:
+      type: disk
+
+# network structures
+network_g:
+  type: NAFNet
+  width: 64
+  enc_blk_nums: [2, 2, 4, 8]
+  middle_blk_num: 12
+  dec_blk_nums: [2, 2, 2, 2]
+
+# path
+path:
+  # Carica il modello pre-addestrato per iniziare il fine-tuning
+  pretrain_network_g: experiments/pretrained_models/NAFNet-SIDD-width64.pth
+  strict_load_g: true
+  resume_state: ~
+
+# training settings
+train:
+  optim_g:
+    type: AdamW
+    lr: !!float 1e-4 # Learning rate ridotto per non "distruggere" i pesi pre-addestrati
+    weight_decay: !!float 0
+    betas: [0.9, 0.9]
+
+  scheduler:
+    type: TrueCosineAnnealingLR
+    T_max: 40000 # Numero di iterazioni (circa 400 epoche con batch 8 su 800 immagini)
+    eta_min: !!float 1e-7
+
+  total_iter: 40000 
+  warmup_iter: -1 # no warm up
+
+# validation settings
+val:
+  val_freq: !!float 1000 # Esegue la validazione ogni 1000 iterazioni
+  save_img: false # Imposta a true se vuoi vedere le immagini salvate durante il training
+
+  metrics:
+    psnr:
+      type: calculate_psnr
+      crop_border: 0
+      test_y_channel: false
+    ssim:
+      type: calculate_ssim
+      crop_border: 0
+      test_y_channel: false
+
+# logging settings
+logger:
+  print_freq: 100
+  save_checkpoint_freq: !!float 1000
+  visual_freq: !!float 1000
+  use_tb_logger: true # Abilita Tensorboard per vedere i grafici

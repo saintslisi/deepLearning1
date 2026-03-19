@@ -1,0 +1,54 @@
+# ------------------------------------------------------------------------
+# NAFNet Custom Baseline Test Configuration
+# ------------------------------------------------------------------------
+name: NAFSSR-L_4x_Baseline_Test
+model_type: ImageRestorationModel
+scale: 4
+num_gpu: 0 # Forza l'utilizzo della CPU
+manual_seed: 10
+
+# dataset and data loader settings
+datasets:
+  # Abbiamo rimosso i dataset di default (KITTI, Flickr) per velocizzare
+  test_custom:
+    name: DIV2K_Validation
+    # Usiamo PairedImageDataset per caricare coppie LQ e GT singole
+    type: PairedImageDataset 
+    # Percorsi relativi partendo dalla cartella NAFNet/
+    dataroot_gt: ../datasets/DIV2K_valid_HR
+    dataroot_lq: ../datasets/DIV2K_valid_LR_custom
+    io_backend:
+      type: disk
+
+# network structures
+network_g:
+  type: NAFSSR # Architettura necessaria per upscale x4
+  up_scale: 4
+  width: 128
+  num_blks: 128
+
+# path
+path:
+  # Assicurati che il file .pth sia esattamente in questa cartella
+  pretrain_network_g: experiments/pretrained_models/NAFSSR-L_4x.pth
+  strict_load_g: true
+  resume_state: ~
+
+# validation settings
+val:
+  save_img: true # Salva le immagini restaurate in NAFNet/results/
+  grids: false
+
+  metrics:
+    psnr: 
+      type: calculate_psnr
+      crop_border: 4 # Escludiamo i bordi per un calcolo più accurato in SR
+      test_y_channel: false
+    ssim:
+      type: calculate_skimage_ssim
+      crop_border: 4
+
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500
