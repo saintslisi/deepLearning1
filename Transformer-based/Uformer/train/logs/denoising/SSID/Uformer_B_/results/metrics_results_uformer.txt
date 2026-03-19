@@ -1,0 +1,3 @@
+RISULTATI FINALI su 100 immagini:
+PSNR Medio: 23.6748 dB
+SSIM Medio: 0.5763
