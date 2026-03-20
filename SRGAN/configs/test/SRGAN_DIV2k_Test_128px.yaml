@@ -1,0 +1,40 @@
+# experiment name
+EXP_NAME: SRGAN_DIV2K_Test_Result_128px
+# random number seed
+SEED: 0
+# Super resolution magnification factor
+SCALE: 4
+# run device model
+DEVICE_ID: 0
+
+# Model weights path
+MODEL_WEIGHTS_PATH: "./results/SRGAN_DIV2K_Noisy_128px/g_best.pth.tar"
+
+# Model define
+MODEL:
+  G:
+    NAME: srresnet_x4
+    IN_CHANNELS: 3
+    OUT_CHANNELS: 3
+    CHANNELS: 64
+    NUM_RCB: 16
+    COMPILED: True
+
+TEST:
+  DATASET:
+    PAIRED_TEST_GT_IMAGES_DIR: "./data/DIV2K_test_HR"
+    PAIRED_TEST_LR_IMAGES_DIR: "./data/DIV2K_test_LR_noisy"
+
+  # Test hyperparameters
+  HYP:
+    IMGS_PER_BATCH: 1
+    SHUFFLE: False
+    NUM_WORKERS: 1
+    PIN_MEMORY: True
+    PERSISTENT_WORKERS: True
+
+  # Only test Y channel (standard per calcolo metriche SR)
+  ONLY_TEST_Y_CHANNEL: True
+
+  # Save Images
+  SAVE_IMAGE_DIR: "./results/test_images"
