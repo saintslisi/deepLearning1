@@ -1,0 +1,34 @@
+name: image-restoration
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  # Uformer dichiarava torch==1.8.0, ma il training su Apple Silicon (backend MPS)
+  # richiede almeno la 2.0: usiamo una sola versione per tutti e tre i modelli.
+  - pytorch>=2.0
+  - torchvision>=0.15
+  - numpy>=1.24
+  - scipy
+  - scikit-image
+  - matplotlib
+  - pillow
+  - pyyaml
+  - h5py
+  - joblib
+  - tqdm
+  - requests
+  - lmdb
+  - pip:
+      - opencv-python>=4.8
+      - natsort>=8.4
+      - einops
+      - timm
+      - ptflops
+      - yacs
+      - linformer
+      - addict
+      - future
+      - tensorboard
+      - yapf

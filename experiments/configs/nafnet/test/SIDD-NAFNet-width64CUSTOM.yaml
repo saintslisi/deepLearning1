@@ -1,0 +1,57 @@
+# ------------------------------------------------------------------------
+# NAFNet Custom Denoising Configuration (Basato su SIDD width64)
+# ------------------------------------------------------------------------
+name: NAFNet-SIDD-width64_Custom_Test
+model_type: ImageRestorationModel
+scale: 1 # Nel denoising la risoluzione non cambia
+num_gpu: 0 # Imposta a 1 se hai una GPU NVIDIA e i driver CUDA installati
+manual_seed: 10
+
+# dataset and data loader settings
+datasets:
+  test_custom:
+    name: My_Custom_Denoising_Dataset
+    type: PairedImageDataset 
+    # Percorsi delle tue cartelle (Modificali in base a dove metti le immagini)
+    # datroot_gt: immagini pulite (Ground Truth)
+    # dataroot_lq: immagini con rumore (Low Quality/Noisy)
+    dataroot_gt: data/DIV2K_valid_HR
+    dataroot_lq: data/DIV2K_valid_LR_custom
+    
+    io_backend:
+      type: disk # Caricamento semplice da cartelle di file (PNG/JPG)
+
+# network structures
+network_g:
+  type: NAFNet
+  width: 64
+  enc_blk_nums: [2, 2, 4, 8]
+  middle_blk_num: 12
+  dec_blk_nums: [2, 2, 2, 2]
+
+# path
+path:
+  # Assicurati che il file scaricato sia rinominato correttamente o punta al nome esatto
+  pretrain_network_g: experiments/pretrained_models/NAFNet-SIDD-width64.pth
+  strict_load_g: true
+  resume_state: ~
+
+# validation settings
+val:
+  save_img: true # Salva i risultati in NAFNet/results/
+  grids: false
+
+  metrics:
+    psnr: 
+      type: calculate_psnr
+      crop_border: 0 # Per il denoising non si tagliano i bordi
+      test_y_channel: false
+    ssim:
+      type: calculate_ssim
+      crop_border: 0
+      test_y_channel: false
+
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500
