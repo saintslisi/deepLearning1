@@ -1,4 +1,25 @@
+# Dati e pesi
+data/*
+!data/README.md
 *.pth
-*.png
-*.pyc
+*.pt
+*.ckpt
+
+# Output di training ed esperimenti
+experiments/logs/*
+!experiments/logs/README.md
+results/
+*.log
+
+# Artefatti Python
 __pycache__/
+*.pyc
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Sistema / editor
+.DS_Store
+.vscode/
+.idea/
